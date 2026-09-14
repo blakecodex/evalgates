@@ -1,0 +1,46 @@
+{
+  "dataset": "freMTPL2freq (french motor third-party liability, claim counts)",
+  "source": "https://github.com/dutangc/CASdatasets -> data/freMTPL2freq.rda",
+  "license_note": "CASdatasets distributes freMTPL2freq for public research use",
+  "extracted": "2026-09-11",
+  "full_rows": 677991,
+  "full_sha256": "84e8928f2079b477500ff008660781d41ba1b229f7a33badd1ce01b3bb618eec",
+  "full_sha256_content": "43ac51f2c76dbaa3558b0277bf55b8ae32e4fb3019d58b80e6edf2a705e071ea",
+  "indomain": {
+    "input_rows": 677991,
+    "kept": 676688,
+    "drops": {
+      "exposure": 1224,
+      "driv_age": 0,
+      "veh_age": 79,
+      "veh_power": 0,
+      "bonus_malus": 0,
+      "density": 0,
+      "area": 0
+    }
+  },
+  "slice_seed": 20260910,
+  "slices": {
+    "reference": {
+      "rows": 12000,
+      "sha256": "5243e80630dc0ee9d0619021a8fb42d36d113bc596b59ae24332d4c882fdf058",
+      "sha256_content": "aa36b8c8afe5c2595372dda60461bd89e3da04cbe1e9c1accee87b3702d9aecc"
+    },
+    "evaluation": {
+      "rows": 12000,
+      "sha256": "f79aeae34a9be69c29e8795eb8d0b25dde81d22822ad3516d4d178521e356b29",
+      "sha256_content": "39ecf43e40a72598b28bacb72a42cd5e3a003a94b4cc495b141abd43053a91a1"
+    }
+  },
+  "columns": [
+    "exposure",
+    "driv_age",
+    "veh_age",
+    "veh_power",
+    "bonus_malus",
+    "density",
+    "area",
+    "claim_nb"
+  ],
+  "method": "git sparse-checkout -> rdata parse -> domain filter -> seeded shuffle -> two disjoint 12k slices"
+}
