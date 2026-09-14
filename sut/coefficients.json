@@ -1,0 +1,171 @@
+{
+  "model": "poisson glm, log link, offset ln(exposure)",
+  "fitted": "2026-09-11",
+  "fitted_on_rows": 676688,
+  "data": "freMTPL2freq, in-domain filter per data/sample/provenance.json",
+  "domain": {
+    "exposure": [
+      0.002,
+      1.0
+    ],
+    "driv_age": [
+      18,
+      100
+    ],
+    "veh_age": [
+      0,
+      60
+    ],
+    "veh_power": [
+      4,
+      15
+    ],
+    "bonus_malus": [
+      50,
+      230
+    ],
+    "density": [
+      1,
+      30000
+    ]
+  },
+  "coefficients": {
+    "intercept": -3.186536,
+    "bonus_malus": 0.261502,
+    "log_density": 0.055091,
+    "veh_power": 0.03429,
+    "drivage_18_25": -0.182155,
+    "drivage_26_40": -0.29426,
+    "drivage_61_plus": -0.11058,
+    "vehage_0_1": -0.130199,
+    "vehage_10_plus": -0.155536,
+    "area_B": 0.045294,
+    "area_C": 0.055896,
+    "area_D": 0.119536,
+    "area_E": 0.132356,
+    "area_F": -0.034136
+  },
+  "standard_errors": {
+    "intercept": 0.051514,
+    "bonus_malus": 0.003481,
+    "log_density": 0.014698,
+    "veh_power": 0.003175,
+    "drivage_18_25": 0.025701,
+    "drivage_26_40": 0.015063,
+    "drivage_61_plus": 0.018387,
+    "vehage_0_1": 0.018977,
+    "vehage_10_plus": 0.013612,
+    "area_B": 0.0304,
+    "area_C": 0.038893,
+    "area_D": 0.058762,
+    "area_E": 0.078106,
+    "area_F": 0.107187
+  },
+  "fit_log": [
+    {
+      "iter": 1,
+      "deviance": 169083.8932,
+      "max_step": 0.5247858247568056
+    },
+    {
+      "iter": 2,
+      "deviance": 165239.3298,
+      "max_step": 0.08218827094604697
+    },
+    {
+      "iter": 3,
+      "deviance": 164801.5505,
+      "max_step": 0.08726326398903966
+    },
+    {
+      "iter": 4,
+      "deviance": 164791.6457,
+      "max_step": 0.026080108422180726
+    },
+    {
+      "iter": 5,
+      "deviance": 164791.6395,
+      "max_step": 0.0008010679442035373
+    },
+    {
+      "iter": 6,
+      "deviance": 164791.6395,
+      "max_step": 5.52791332569802e-07
+    },
+    {
+      "iter": 7,
+      "deviance": 164791.6395,
+      "max_step": 1.5480762505237777e-11
+    }
+  ],
+  "twin_check": {
+    "cross_check": "statsmodels GLM poisson",
+    "max_abs_diff": 1.3245680940965343e-10
+  },
+  "calibration_on_evaluation_slice": {
+    "table": [
+      {
+        "decile": 1,
+        "exposure": 637.3,
+        "predicted": 0.0399,
+        "observed": 0.0298
+      },
+      {
+        "decile": 2,
+        "exposure": 638.8,
+        "predicted": 0.0468,
+        "observed": 0.0548
+      },
+      {
+        "decile": 3,
+        "exposure": 638.0,
+        "predicted": 0.0512,
+        "observed": 0.0407
+      },
+      {
+        "decile": 4,
+        "exposure": 638.1,
+        "predicted": 0.0553,
+        "observed": 0.0596
+      },
+      {
+        "decile": 5,
+        "exposure": 637.4,
+        "predicted": 0.0594,
+        "observed": 0.0769
+      },
+      {
+        "decile": 6,
+        "exposure": 637.8,
+        "predicted": 0.0638,
+        "observed": 0.0627
+      },
+      {
+        "decile": 7,
+        "exposure": 638.7,
+        "predicted": 0.0693,
+        "observed": 0.0845
+      },
+      {
+        "decile": 8,
+        "exposure": 637.9,
+        "predicted": 0.077,
+        "observed": 0.0533
+      },
+      {
+        "decile": 9,
+        "exposure": 638.2,
+        "predicted": 0.095,
+        "observed": 0.094
+      },
+      {
+        "decile": 10,
+        "exposure": 638.4,
+        "predicted": 0.1766,
+        "observed": 0.1551
+      }
+    ],
+    "worst_decile_gap": 0.0237,
+    "portfolio_gap": 0.0023
+  }
+}
