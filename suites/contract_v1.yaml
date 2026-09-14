@@ -1,0 +1,31 @@
+suite: contract_v1
+version: 1
+description: >
+  api promises: health, scored shape, the no-score band, 422 on malformed
+  requests, batch arithmetic, latency ceiling. runs on every push.
+checks:
+  - id: healthz
+    family: contract
+    params: {aspect: healthz}
+
+  - id: scored_shape
+    family: contract
+    params: {aspect: scored_shape}
+
+  - id: no_score_band
+    family: contract
+    params: {aspect: no_score_band}
+
+  - id: malformed_422
+    family: contract
+    params: {aspect: malformed_422, max_batch: 500}
+
+  - id: batch_contract
+    family: contract
+    params: {aspect: batch}
+
+  # ceiling is for the in-process target ci uses; a deployed target gets
+  # its own suite with a ceiling that includes network time
+  - id: latency_p95
+    family: contract
+    params: {aspect: latency_p95, n: 200, p95_ms: 50}

@@ -1,0 +1,14 @@
+{
+  "suite": "release_v1",
+  "saved_at": "2026-09-11T03:41:43+00:00",
+  "model_version": "2f2d603aaf83",
+  "metrics": {
+    "calibration_deciles": {
+      "worst_decile_gap": 0.0222,
+      "portfolio_gap": 0.0023
+    },
+    "drift_scores_psi": {
+      "psi": 0.002
+    }
+  }
+}

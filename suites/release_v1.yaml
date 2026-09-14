@@ -1,0 +1,67 @@
+suite: release_v1
+version: 1
+description: >
+  everything that must hold before a release ships: the full contract,
+  every supported monotonic direction, calibration on the evaluation slice,
+  and drift of the scored distribution against the reference slice. the
+  gate runs this suite and blocks the merge on its exit code.
+checks:
+  # --- contract ---
+  - id: healthz
+    family: contract
+    params: {aspect: healthz}
+  - id: scored_shape
+    family: contract
+    params: {aspect: scored_shape}
+  - id: no_score_band
+    family: contract
+    params: {aspect: no_score_band}
+  - id: malformed_422
+    family: contract
+    params: {aspect: malformed_422, max_batch: 500}
+  - id: batch_contract
+    family: contract
+    params: {aspect: batch}
+  - id: latency_p95
+    family: contract
+    params: {aspect: latency_p95, n: 200, p95_ms: 50}
+
+  # --- monotonicity (supported directions only; see docs/monotonicity-notes.md) ---
+  - id: mono_bonus_malus
+    family: monotonic
+    params: {aspect: pairs, factor: bonus_malus, steps: [50, 70, 90, 120, 160, 200, 230]}
+  - id: mono_density
+    family: monotonic
+    params: {aspect: pairs, factor: density, steps: [10, 100, 1000, 10000, 30000]}
+  - id: mono_veh_power_below_cap
+    family: monotonic
+    params: {aspect: pairs, factor: veh_power, steps: [4, 6, 8, 10, 12]}
+  - id: mono_veh_power_cap
+    family: monotonic
+    params: {aspect: flat_past_cap, factor: veh_power, values: [12, 13, 14, 15]}
+
+  # --- calibration on the evaluation slice ---
+  # the slice is in-sample (part of the fit rows) on purpose: this check
+  # mirrors a production calibration monitor, which measures the book the
+  # model actually scores - it tests serving, not generalization.
+  # measured at fit time: worst decile gap 0.0237, portfolio gap 0.0023.
+  # thresholds leave ~2x headroom on the decile gap and ~4x on the
+  # portfolio gap - room for sampling noise, not for a real regression
+  - id: calibration_deciles
+    family: calibration
+    params:
+      slice: data/sample/fremtpl_evaluation.csv.gz
+      max_decile_gap: 0.05
+      max_portfolio_gap: 0.01
+
+  # --- drift: evaluation cohort against reference bins ---
+  # both slices come from the same book, so the healthy value is near zero;
+  # the fences are the standard 0.10 watch / 0.20 investigate
+  - id: drift_scores_psi
+    family: drift
+    params:
+      reference: data/sample/fremtpl_reference.csv.gz
+      current: data/sample/fremtpl_evaluation.csv.gz
+      bins: 10
+      warn_at: 0.10
+      fail_at: 0.20
