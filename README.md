@@ -25,7 +25,7 @@ flowchart LR
 
 ## run it
 
-    pip install -r requirements.txt
+    python -m pip install -r requirements.txt
     python -m pytest tests/ -q                                  # 83 tests
     python -m evalgates.gate --suite suites/release_v1.yaml \
         --baseline baseline.json --report out/report.html       # 12 checks, exit 0
