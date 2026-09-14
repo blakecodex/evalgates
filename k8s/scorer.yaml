@@ -1,0 +1,56 @@
+# deployment + service for the scorer. illustrative but complete: apply it
+# to any cluster with the image pushed to a registry it can reach. the
+# probes hit /healthz, which loads the coefficients - a pod with a broken
+# model artifact never becomes ready, so a bad rollout stalls instead of
+# serving wrong answers while old pods drain.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claim-scorer
+  labels:
+    app: claim-scorer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: claim-scorer
+  template:
+    metadata:
+      labels:
+        app: claim-scorer
+    spec:
+      containers:
+        - name: scorer
+          image: claim-scorer:latest   # push to your registry and pin a digest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: claim-scorer
+spec:
+  selector:
+    app: claim-scorer
+  ports:
+    - port: 80
+      targetPort: 8080

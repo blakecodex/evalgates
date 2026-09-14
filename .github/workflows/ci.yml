@@ -1,0 +1,41 @@
+# two jobs, strictly ordered: unit tests prove the pieces, then the gate
+# proves the release. a red gate blocks the merge - that is its whole job.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m pytest tests/ -q
+
+  gate:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      # in-process target: hermetic, no network, same checks as staging
+      - run: |
+          python -m evalgates.gate --suite suites/release_v1.yaml \
+            --baseline baseline.json \
+            --export out/testrail.json --report out/report.html
+      - uses: actions/upload-artifact@v4
+        if: always()                    # a red run's report is the useful one
+        with:
+          name: gate-report
+          path: out/

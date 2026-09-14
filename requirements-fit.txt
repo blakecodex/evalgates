@@ -1,0 +1,7 @@
+# extras for refitting the model or re-pulling the data. not needed to run
+# the service, the tests, or the gate - coefficients.json and the slices are
+# committed. kept separate so the service image stays small.
+-r requirements.txt
+statsmodels==0.15.0
+pandas==3.0.2
+rdata==1.1.0

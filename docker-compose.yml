@@ -1,0 +1,36 @@
+# two ways to use this file:
+#
+#   docker compose up scorer          just the service, on localhost:8080
+#   docker compose run gate           gate the RUNNING CONTAINER over http -
+#                                     the same suite ci runs in-process,
+#                                     pointed at a real deployment target
+services:
+  scorer:
+    build: .
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  gate:
+    build: .
+    profiles: ["gate"]
+    depends_on:
+      scorer:
+        condition: service_healthy
+    volumes:
+      - ./evalgates:/app/evalgates:ro
+      - ./suites:/app/suites:ro
+      - ./data:/app/data:ro
+      - ./baseline.json:/app/baseline.json:ro
+      - ./out:/app/out
+    environment:
+      RUNS_DB: /app/out/runs.db
+    command: >
+      python -m evalgates.gate --suite suites/release_v1.yaml
+      --base-url http://scorer:8080 --baseline baseline.json
+      --export out/testrail.json --report out/report.html
