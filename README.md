@@ -27,8 +27,7 @@ flowchart LR
 
     python -m pip install -r requirements.txt
     python -m pytest tests/ -q                                  # 83 tests
-    python -m evalgates.gate --suite suites/release_v1.yaml \
-        --baseline baseline.json --report out/report.html       # 12 checks, exit 0
+    python -m evalgates.gate --suite suites/release_v1.yaml --baseline baseline.json --report out/report.html   # 12 checks, exit 0
     uvicorn sut.app:app --port 8080                             # the risk service
 
 ## the four check families
