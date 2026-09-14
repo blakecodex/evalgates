@@ -1,17 +1,27 @@
 # evalgates
 
-A release gate for model-backed services: versioned check suites, a
-fail-closed gate with a regression baseline, TestRail-shaped results,
-an HTML run report, and CI as the merge blocker.
+An evaluation harness for model-backed systems: versioned check suites,
+a fail-closed release gate with a regression baseline, TestRail-shaped
+results, and CI as the merge blocker. Built for the failure class that
+schema tests miss - well-formed answers that are quietly wrong - whether
+the model behind the service is an LLM or a classical one.
 
-The system under test here is deliberately not an LLM. It is a
-claim-frequency model (Poisson GLM, fitted from scratch on 677k public
-French motor policies) served over HTTP - the same failure class as any
-model service, including LLM systems: well-formed answers that are
-quietly wrong. A deterministic SUT means every check, threshold, and
-seeded defect in this repo runs keyless and proves out end to end in CI.
-The harness pattern is the part built to transfer; the SUT is the part
-built to be verifiable.
+Systems under test plug in behind one client seam - the runner speaks to
+them over HTTP, in-process for CI or `--base-url` for anything deployed.
+This repo ships one end to end so every claim is verifiable: an insurance
+risk scorer, gated release by release. Adding another target is a new
+suite file, not new harness code.
+
+```mermaid
+flowchart LR
+    S[versioned suites - yaml] --> R[runner]
+    R <-->|http| T[system under test<br>included: insurance risk scorer]
+    R --> F[contract - monotonic - calibration - drift]
+    F --> G{fail-closed gate}
+    G -->|exit 0| OK[ship]
+    G -->|exit 1 / 2 / 3| NO[block: threshold - regression - error]
+    G --> H[(history - testrail - html report)]
+```
 
 ## run it
 
@@ -19,45 +29,48 @@ built to be verifiable.
     python -m pytest tests/ -q                                  # 83 tests
     python -m evalgates.gate --suite suites/release_v1.yaml \
         --baseline baseline.json --report out/report.html       # 12 checks, exit 0
-    uvicorn sut.app:app --port 8080                             # the service
+    uvicorn sut.app:app --port 8080                             # the risk service
 
 ## the four check families
 
 | family | what it catches |
 |---|---|
-| contract | broken shapes, a dropped out-of-domain refusal, batch errors, latency over ceiling |
-| monotonic | a risk factor pointing the wrong way - every response well-formed, every price wrong |
-| calibration | predicted levels drifting from observed while ranking metrics stay green |
-| drift | today's scored population no longer matching the approved one (PSI, frozen bins) |
+| contract | broken shapes, a dropped out-of-domain refusal, batch errors, latency |
+| monotonic | a risk factor pointing the wrong way while every response stays well-formed |
+| calibration | predicted risk levels drifting from observed while ranking metrics stay green |
+| drift | the scored population no longer matching the one the release was approved on |
 
-Thresholds live in yaml under `suites/`; changing one is a reviewable
-diff, not a code change.
+Thresholds are yaml under `suites/` - changing one is a reviewable diff.
 
 ## proven able to fail
 
-Every family ships with a seeded-defect test: flip a coefficient sign
-and the monotonic family fails; bias the intercept and calibration fails
-while ranking metrics would still pass; feed a shifted cohort and PSI
-reads 3.59 against a 0.20 fence; drop the out-of-domain refusal and the
-contract family fails. A harness that has never been seen to fail proves
-nothing.
+Each family ships with a seeded-defect test: flip a coefficient sign,
+bias the intercept, shift the cohort, drop the refusal - the responsible
+family must fail, and does. A harness never seen to fail proves nothing.
 
 ## the gate
 
-Exit 0 ship, 1 threshold failure, 2 regression against the saved
-baseline, 3 error - and an error blocks exactly like a failure. A red
-run can never be saved as the baseline. Run history is SQL (`RUNS_DB`
-env is the Postgres seam); results export in TestRail's bulk-results
-shape.
+Exit 0 ship, 1 threshold failure, 2 regression vs baseline, 3 error -
+errors block like failures, and a red run can never become the baseline.
+History is SQL (`RUNS_DB` is the Postgres seam); results export in
+TestRail's bulk shape; each run writes a self-contained HTML report.
 
-## ops
+## data
 
-CI runs tests, then the gate, as the merge blocker, and uploads the run
-report even when red. `docker compose run gate` points the same suites
-at a running container; the k8s manifest wires readiness to `/healthz`,
-which loads the model artifact - a broken artifact never becomes ready.
+Each system under test brings its own data, under the same rules: public
+or synthetic sources only, checksummed artifacts, and a fetch script
+that reproduces the whole chain - provenance travels with everything
+committed, and a test fails the build if the data changes silently.
+
+The included risk scorer is fitted on 677k public motor liability
+policies, the standard open dataset for claim frequency - filtered,
+sliced, and checksummed by `data/fetch_fremtpl.py`. No client data
+anywhere.
 
 ## limits
 
-Frequency only, no severity model. One latency ceiling, no load testing.
-No auth - a test target, not a production service.
+The included scorer models claim frequency only, no severity, and the
+harness runs a single latency ceiling rather than load testing. The
+service carries no auth - it is a test target, not a production
+deployment. And the gate enforces only what its suites define: coverage
+is a suite-authoring decision, reviewed like code.
